@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1601320576015.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "701553785",
+    "id" : "3E247857",
+    "lastKnownWriteTime" : 1601320849,
+    "last_content_update" : 1601320849862,
+    "path" : "~/Documents/Miami MSBA Fall 2020/ISA 616/Rplay_happiness.R",
+    "project_path" : "Rplay_happiness.R",
+    "properties" : {
+        "cursorPosition" : "162,0",
+        "scrollLine" : "147",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
