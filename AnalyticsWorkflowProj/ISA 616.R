@@ -5,6 +5,7 @@ happy<- read.csv("HappyData.csv", stringsAsFactors = TRUE)
 ### Explore and Introduce Data ###
 
 install.packages("DataExplorer")
+install.packages("tidyverse")
 library(ggplot2)
 library(caret)
 library(tidyverse)
@@ -138,6 +139,7 @@ library(ggplot2)
 
 
 ### create visuals
+install.packages("tidyverse")
 library(caret)
 library(tidyverse)
 
