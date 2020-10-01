@@ -1,20 +1,22 @@
 ### Read in Happiness Data ###
 
-
-happy<- read.csv("HappyData.csv")
+happy<- read.csv("HappyData.csv", stringsAsFactors = TRUE)
 
 ### Explore and Introduce Data ###
 
 install.packages("DataExplorer")
+library(ggplot2)
+library(caret)
+library(tidyverse)
 library(DataExplorer)
 library(dplyr)
-library(DataExplorer)
 introduce(happy)
 plot_intro(happy)
 plot_missing(happy)
 class(happy)
 str(happy)
 plot_str(happy)
+head(happy)
 
 ### remove columns that have > 50% missing ###
 
@@ -122,50 +124,59 @@ happy<- select(happy, -"social_M")
 
 plot_missing(happy)
 
-###training and validation split
+#remove country.name because the name is not a predictor of the happiness score
+happy.preds<-select(happy,-"Country.name")
 
-set.seed(13)
-trainIndex<-sample(1:nrow(happy), size = round(0.7*nrow(happy)), replace = F)
-happy.train<-happy[trainIndex,]
-happy.valid<-happy[-trainIndex,]
-nrow(happy.train)
-nrow(happy.valid)
-dim(happy.train)
-dim(happy.valid)
-
-happy <- happy[, sapply(happy.train, function(col) length(unique(col))) > 1]
-set.seed(13)
-trainIndex<-sample(1:nrow(happy), size = round(0.7*nrow(happy)), replace = F)
-happy.train<-happy[trainIndex,]
-happy.valid<-happy[-trainIndex,]
-
-happy.train.preds<-select(happy.train,-"Country.name")
 ### create model
 
 set.seed(13)
-lm.model <- lm(Life.Ladder~. , data=happy.train.preds)
+lm.model <- lm(Life.Ladder~. , data=happy.preds)
 summary(lm.model)
 
 
 library(ggplot2)
 
-### test model
-
-preds<- predict(lm.model, happy.valid)
-AIC(lm.model)
-
-actuals_preds <- data.frame(cbind(actuals=happy.valid$Life.Ladder, predicteds=preds))  # make actuals_predicteds dataframe.
-correlation_accuracy <- cor(actuals_preds)  
-correlation_accuracy
-head(actuals_preds)
-
 
 ### create visuals
 library(caret)
+library(tidyverse)
+
+messyline<- ggplot()+
+  geom_line(aes(x=year, y=Life.Ladder, group=Country.name), data=happy)+
+  labs(x="Year", y="Happiness Level", title = "Happiness Over Time by Country")+
+  theme_classic()
+
 bar.data<- data.frame(varImp(lm.model))
 
-bar.data
+varImp(lm.model)
 
-ggplot(bar.data, aes(x=Overall)) + geom_()
+#list of variables used in the model
+fname<-c("year", "Log.GDP.per.capita", "Social.support", "Healthy.life.expectancy.at.birth",
+         "Freedom.to.make.life.choices","Generousity","Perceptions.of.corruption","Positive.affect",
+         "Negative.affect", "Confidence.in.national.government","Democratic.Quality","Delivery.Quality",
+         "Standard.deviation.of.ladder.by.country.year","Standard.deviation.Mean.of.Ladder.by.country.year")
+
+#corresponding variable importance of each variable
+score<-c(1.659665, 9.141023, 3.384381, 1.918980,
+         2.400348, 7.780425, 15.198471, 6.231466,
+         4.828223, 4.678699, 2.685804, 3.064541, 49.313031, 64.852818)
+dat<-data.frame(fname,score)
+order.scores<-order(dat$score,dat$fname)
+dat1<-dat[order.scores,]
+
+
+#chart that shows overall importance of scores based on dat1 (for all countries)
+lollipop<- ggplot(dat1, aes(fname,score))+
+  geom_point(aes(x=fname, y=score, size=score, color=fname), data=dat1)+
+  labs(x="Predictor Column", y="Importance of Predictor", title = "Overall Importance of Predictors of Happiness")+
+  theme_classic(
+  )+
+  geom_linerange(aes(x=fname, ymin=0, ymax= score, color=fname),
+                  size = 5)+
+  theme(axis.text.x = element_text(angle=45))
+lollipop
 
 ### connect infrormation about significant variables
+
+### seperate countries?
+

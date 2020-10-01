@@ -1,0 +1,83 @@
+---
+title: "Class Markdown Example"
+author: 
+  - Allison Jones-Farmer
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+bibliography: refs.bib
+output: 
+  html_document:
+    code_folding: show
+    df_print: paged
+    number_sections: yes
+    theme: cerulean
+    toc: yes
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      cache=TRUE,
+                      out.width="100%",
+                      warning=FALSE,
+                      message=FALSE,
+                      clean_cache=TRUE)
+```
+
+# Introduction
+
+
+
+This is an `RMarkdown` document.  For more details on using `RMarkdown`, see <http://rmarkdown.rstudio.com>.  
+
+Here is another great reference for `RMarkdown` <https://rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf>
+
+Here is the `RMarkdown` Cookbook:  <https://bookdown.org/yihui/rmarkdown-cookbook/font-color.html>
+
+
+
+
+# Annotated Summary
+
+## One number
+
+```{r pressure,results='asis'}
+
+```
+
+## A table
+
+
+```{r pressureTable}
+
+```
+
+
+# Including Plots 
+
+You can also embed plots, for example:
+
+## Plotly 
+
+```{r pressurePlot, echo=FALSE}
+
+```
+
+## Map
+
+```{r fsbLoc, echo=FALSE}
+
+```
+
+For more details on organizing with tabset go here <https://bookdown.org/yihui/rmarkdown-cookbook/html-tabs.html>.
+
+# Equations
+
+You can include both inline and offset equations.
+
+## Inline equations
+
+
+## Offset equations
+
+
+# References
