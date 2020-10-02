@@ -3,10 +3,13 @@
 happy<- read.csv("HappyData.csv", stringsAsFactors = TRUE)
 
 ### Explore and Introduce Data ###
-library(packman)
+library(pacman)
 p_load(DataExplorer, tidyverse, broom, caret, dplyr)
 
-
+if(require(checkpoint)==FALSE)
+  install.packages("checkpoint")
+library(checkpoint)
+checkpoint(snapshotDate="2020-0-01")
 
 introduce(happy)
 plot_intro(happy)
