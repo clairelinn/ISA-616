@@ -39,13 +39,13 @@ happy<- read.csv("HappyData.csv", stringsAsFactors = TRUE)
 
 ```{r}
 
-#install.packages("DataExplorer")
-#install.packages("tidyverse")
-#library(ggplot2)
-#library(caret)
-#library(tidyverse)
-#library(DataExplorer)
-#library(dplyr)
+install.packages("DataExplorer")
+install.packages("tidyverse")
+library(ggplot2)
+library(caret)
+library(tidyverse)
+library(DataExplorer)
+library(dplyr)
 
 ```
 

@@ -3,14 +3,11 @@
 happy<- read.csv("HappyData.csv", stringsAsFactors = TRUE)
 
 ### Explore and Introduce Data ###
+library(packman)
+p_load(DataExplorer, tidyverse, broom, caret, dplyr)
 
-install.packages("DataExplorer")
-install.packages("tidyverse")
-library(ggplot2)
-library(caret)
-library(tidyverse)
-library(DataExplorer)
-library(dplyr)
+
+
 introduce(happy)
 plot_intro(happy)
 plot_missing(happy)
