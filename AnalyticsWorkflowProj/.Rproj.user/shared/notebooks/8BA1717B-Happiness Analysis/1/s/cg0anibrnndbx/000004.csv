@@ -1,9 +1,8 @@
-"0",""
-"0","install.packages(""DataExplorer"")"
-"1","
-"
-"1",""
-"1","  There are binary versions available but the source versions are later"
-"1",""
-"1",":
+"0","#install.packages(""DataExplorer"")"
+"0","#install.packages(""tidyverse"")"
+"0","library(ggplot2)"
+"0","library(caret)"
+"0","library(tidyverse)"
+"2","Error: package or namespace load failed for ‘tidyverse’ in loadNamespace(j <- i[[1L]], c(lib.loc, .libPaths()), versionCheck = vI[[j]]):
+ there is no package called ‘broom’
 "

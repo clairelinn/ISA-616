@@ -1,9 +1,9 @@
 {
-    "path": "~/Documents/Miami MSBA Fall 2020/ISA 616/AnalyticsWorkflowProj",
-    "sortOrder": [
+    "path" : "~/Documents/Miami MSBA Fall 2020/ISA 616/AnalyticsWorkflowProj",
+    "sortOrder" : [
         {
-            "columnIndex": 2,
-            "ascending": true
+            "ascending" : true,
+            "columnIndex" : 2
         }
     ]
 }

@@ -1,0 +1,58 @@
+"0","plot_intro"
+"1","function (data, geom_label_args = list(), title = NULL, ggtheme = theme_gray(), 
+"
+"1","    theme_config = list()) 
+"
+"1","{
+"
+"1","    id <- dimension <- variable <- value <- NULL
+"
+"1","    intro <- introduce(data)
+"
+"1","    memory_usage <- intro[[""memory_usage""]]
+"
+"1","    class(memory_usage) <- ""object_size""
+"
+"1","    memory_usage_string <- format(memory_usage, unit = ""auto"")
+"
+"1","    intro2 <- data.table(id = seq.int(5L), dimension = c(rep(""column"", 
+"
+"1","        3L), ""row"", ""observation""), variable = c(""Discrete Columns"", 
+"
+"1","        ""Continuous Columns"", ""All Missing Columns"", ""Complete Rows"", 
+"
+"1","        ""Missing Observations""), value = c(intro[[""discrete_columns""]]/intro[[""columns""]], 
+"
+"1","        intro[[""continuous_columns""]]/intro[[""columns""]], intro[[""all_missing_columns""]]/intro[[""columns""]], 
+"
+"1","        intro[[""complete_rows""]]/intro[[""rows""]], intro[[""total_missing_values""]]/intro[[""total_observations""]]))
+"
+"1","    output <- ggplot(intro2, aes(x = reorder(variable, -id), 
+"
+"1","        y = value, fill = dimension)) + geom_bar(stat = ""identity"") + 
+"
+"1","        scale_y_continuous(labels = percent) + scale_fill_discrete(""Dimension"") + 
+"
+"1","        coord_flip() + labs(x = ""Metrics"", y = ""Value"")
+"
+"1","    geom_label_args_list <- list(mapping = aes(label = percent(value)))
+"
+"1","    output <- output + do.call(""geom_label"", c(geom_label_args_list, 
+"
+"1","        geom_label_args))
+"
+"1","    class(output) <- c(""single"", class(output))
+"
+"1","    plotDataExplorer(plot_obj = output, title = ifelse(is.null(title), 
+"
+"1","        paste(""Memory Usage:"", memory_usage_string), title), 
+"
+"1","        ggtheme = ggtheme, theme_config = theme_config)
+"
+"1","}
+"
+"1","<bytecode: 0x115cc4300>
+"
+"1","<environment: namespace:DataExplorer>
+"
+"0","plot_missing(happy)"

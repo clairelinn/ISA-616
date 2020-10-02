@@ -1,68 +1,23 @@
----
-title: "Happiness Analysis"
-author: "Claire Linn"
-date: "`r format(Sys.Date(), '%B %d, %Y')`"
-bibliography: refs.bib
-output: 
-  html_document:
-    code_folding: show
-    df_print: paged
-    number_sections: yes
-    theme: cerulean
-    toc: yes
-    toc_float: yes
----
+### Read in Happiness Data ###
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,
-                      cache=TRUE,
-                      out.width="100%",
-                      warning=FALSE,
-                      message=FALSE,
-                      clean_cache=TRUE)
-```
-
-# Happiness Analytics Workflow
-
-## Introduction
-
-In this analysis I have performed regression of the Happiness data that can be found at www.dfhahiuahrlgiehrgui. (cite source HERE). The happiness data is collected in 166 countries in order to objectively quantify peoples happiness throughout the world. During this process, I have cleaned the data, created a simple multiple regression analysis, evaluated which predictors are most important for predicting any countries Happiness score, and then displayed them in an easily readable graph.
-
-## Reading and cleaning the Happiness data
-
-### First, Read in the Happiness Data, be sure to read the strings as factors, so that each country name is not its own predictor. 
-```{r}
 happy<- read.csv("HappyData.csv", stringsAsFactors = TRUE)
-```
 
-### Next, we will load all of the packages needed for out output and view some summaries of the Happiness data using the DataExplorer package.
+### Explore and Introduce Data ###
+library(packman)
+p_load(DataExplorer, tidyverse, broom, caret, dplyr)
 
-```{r}
 
-install.packages("DataExplorer")
-install.packages("tidyverse")
-library(ggplot2)
-library(caret)
-library(tidyverse)
-library(DataExplorer)
-library(dplyr)
 
-```
-
-```{r}
 introduce(happy)
-plot_intro
+plot_intro(happy)
 plot_missing(happy)
 class(happy)
 str(happy)
 plot_str(happy)
 head(happy)
-```
 
+### remove columns that have > 50% missing ###
 
-### We want to remove columns that have more than 50% of the data missing, based on the plot above, we should remove several columns.
-
-```{r}
 happy<- select (happy, -"Most.people.can.be.trusted..WVS.round.2010.2014",
                 -"Most.people.can.be.trusted..WVS.round.2005.2009",
                 -"Most.people.can.be.trusted..WVS.round.1999.2004",
@@ -73,17 +28,10 @@ happy<- select (happy, -"Most.people.can.be.trusted..WVS.round.2010.2014",
                 -"gini.of.household.income.reported.in.Gallup..by.wp5.year",
                 -"GINI.index..World.Bank.estimate...average.2000.2017..unbalanced.panel",
                 -"GINI.index..World.Bank.estimate.")
-```
-
-### Let's take another look at the missing data, it is clear we need to do something with the rest of the NA rows.
-
-```{r}
 plot_missing(happy)
-```
 
-### I chose to impute with the mean. Once this is done, we will look at the data again to ensure that the data is not missing.
+head(happy)
 
-```{r}
 # impute Confidence.in.national.government
 summary(happy$Confidence.in.national.government)
 happy$Confidence.in.national.government_M<-as.factor(ifelse(is.na(happy$Confidence.in.national.government), 1, 0))
@@ -173,22 +121,32 @@ summary(happy$Social.support)
 happy<- select(happy, -"social_M")
 
 plot_missing(happy)
-```
 
-## Our multiple regression summary output.
-
-```{r}
 #remove country.name because the name is not a predictor of the happiness score
 happy.preds<-select(happy,-"Country.name")
+
+### create model
 
 set.seed(13)
 lm.model <- lm(Life.Ladder~. , data=happy.preds)
 summary(lm.model)
-```
 
-### A visual that displays the most important variables in predicting people's happiness!
 
-```{r}
+library(ggplot2)
+
+
+### create visuals
+install.packages("tidyverse")
+library(caret)
+library(tidyverse)
+
+messyline<- ggplot()+
+  geom_line(aes(x=year, y=Life.Ladder, group=Country.name), data=happy)+
+  labs(x="Year", y="Happiness Level", title = "Happiness Over Time by Country")+
+  theme_classic()
+
+bar.data<- data.frame(varImp(lm.model))
+
 varImp(lm.model)
 
 #list of variables used in the model
@@ -215,8 +173,9 @@ lollipop<- ggplot(dat1, aes(fname,score))+
   geom_linerange(aes(x=fname, ymin=0, ymax= score, color=fname),
                   size = 5)+
   theme(axis.text.x = element_text(angle=45))
-
 lollipop
-```
 
+### connect infrormation about significant variables
+
+### seperate countries?
 
