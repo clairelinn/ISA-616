@@ -1,7 +1,8 @@
 ### Read in Happiness Data ###
 
 happy<- read.csv("HappyData.csv", stringsAsFactors = TRUE)
-
+min(happy$year)
+max(happy$year)
 ### Explore and Introduce Data ###
 library(pacman)
 p_load(DataExplorer, tidyverse, broom, caret, dplyr)
