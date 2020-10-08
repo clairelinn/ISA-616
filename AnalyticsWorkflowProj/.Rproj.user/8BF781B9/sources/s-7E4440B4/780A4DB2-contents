@@ -1,7 +1,7 @@
 # ISA-616
  Analytics Workflow
  
- In order to run the RMD file you should store the data in the same file as the RMD on your local computer and save it. Then, the code should run smoothly in order for you to knit.
+ In order to run the RMD file you should store the data in the same file as the RMD on your local computer and save it. You may also have to manually install some packages if the pacman statement gives you an error (depends on what version of R you are using). If you are on a FSB desktop, it should ask you when you open the file if you would like to "load/install all dependancies", you should do so. After you have the packages installed, the code should run smoothly in order for you to knit. If R asks you if you would "like to install the packages from wich it requires compliation", choose no.
  
  Additionally, the numbers are hard coded into the data frame, as well as the data labels are from the output of the previous code(varImp).  If the model were to be adjusted or changed, you would need to re-code those numbers and labels (based on the varImp output) in order to get a different graph.
  

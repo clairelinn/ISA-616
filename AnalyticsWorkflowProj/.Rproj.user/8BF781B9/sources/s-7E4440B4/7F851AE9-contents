@@ -1,0 +1,285 @@
+---
+title: "Happiness Analysis"
+author: "Claire Linn"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+#bibliography: refs.bib
+output: 
+  html_document:
+    code_folding: show
+    df_print: paged
+    number_sections: yes
+    theme: cerulean
+    toc: yes
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      cache=TRUE,
+                      out.width="100%",
+                      warning=FALSE,
+                      message=FALSE,
+                      clean_cache=TRUE)
+```
+
+# Happiness Analytics Workflow
+
+## Introduction
+
+In this analysis I have performed regression of the [Happiness data](https://worldhappiness.report/ed/2020/). The happiness data is collected in 156 countries in order to objectively quantify peoples happiness throughout the world. The data has 1848 observations (rows) from 2005-2019. It also has 26 variables, all of which are numbers or integers besides the "Country.name" which represents the unique name of the country in which the data was collected. Our target or response variable will be "Life.Ladder" which is the decided happiness score from the data collected. 
+
+During this process, I have cleaned the data, created a simple multiple regression analysis, evaluated which predictors are most important for predicting all countries Happiness score, and then displayed them in an easily readable graph.For more information on each of the predictors and the data dictionary, follow this [link](https://happiness-report.s3.amazonaws.com/2020/WHR20_Ch2_Statistical_Appendix.pdf).
+
+
+## Reading and Cleaning the Happiness data
+
+First, Read in the Happiness Data, be sure to read the strings as factors, so that each country name is not its own predictor. 
+```{r}
+happy<- read.csv("HappyData.csv", stringsAsFactors = TRUE)
+```
+
+Next, we will load all of the packages needed for out output and view some summaries of the Happiness data using the DataExplorer package.
+
+```{r}
+install.packages(pacman)
+library(pacman)
+pacman::p_load(DataExplorer, tidyverse, broom, caret, dplyr,jtools, broom.mixed)
+
+```
+
+First, we will take a look at the data to get a feel for what we are working with.
+
+```{r}
+introduce(happy)
+
+head(happy)
+```
+
+Now, we will see what percentage of data is missing from each column.
+
+```{r}
+plot_missing(happy)
+```
+
+
+We want to remove columns that have more than 50% of the data missing, based on the plot above, we should remove several columns.
+
+```{r}
+happy<- select (happy, -"Most.people.can.be.trusted..WVS.round.2010.2014",
+                -"Most.people.can.be.trusted..WVS.round.2005.2009",
+                -"Most.people.can.be.trusted..WVS.round.1999.2004",
+                -"Most.people.can.be.trusted..WVS.round.1994.1998",
+                -"Most.people.can.be.trusted..WVS.round.1989.1993",
+                -"Most.people.can.be.trusted..WVS.round.1981.1984",
+                -"Most.people.can.be.trusted..Gallup",
+                -"gini.of.household.income.reported.in.Gallup..by.wp5.year",
+                -"GINI.index..World.Bank.estimate...average.2000.2017..unbalanced.panel", -"GINI.index..World.Bank.estimate.")
+```
+
+Let's take another look at the missing data, it is clear we need to do something with the rest of the NA rows.
+
+```{r}
+plot_missing(happy)
+```
+
+## Imputation
+I chose to impute with the mean. Once this is done, we will look at the data again to ensure that the data is not missing.
+
+Imputation is done one column at a time, taking away the NA values, and replacing them with the mean value. This could also be done using the median.This can only be done with predictors that are numerical and we can calculate a mean.
+
+```{r}
+# impute Confidence.in.national.government
+summary(happy$Confidence.in.national.government)
+happy$Confidence.in.national.government_M<-as.factor(ifelse(is.na(happy$Confidence.in.national.government), 1, 0))
+summary(happy$Confidence.in.national.government_M)
+happy$Confidence.in.national.government[is.na(happy$Confidence.in.national.government)]<-mean(happy$Confidence.in.national.government, na.rm=TRUE)
+summary(happy$Confidence.in.national.government)
+happy<- select(happy, -"Confidence.in.national.government_M")
+
+# impute Democratic.Quality
+summary(happy$Democratic.Quality)
+happy$Democratic.Quality_M<-as.factor(ifelse(is.na(happy$Democratic.Quality), 1, 0))
+summary(happy$Democratic.Quality_M)
+happy$Democratic.Quality[is.na(happy$Democratic.Quality)]<-mean(happy$Democratic.Quality, na.rm=TRUE)
+summary(happy$Democratic.Quality)
+happy<- select(happy, -"Democratic.Quality_M")
+
+# impute Delivery.Quality
+summary(happy$Delivery.Quality)
+happy$Delivery.Quality_M<-as.factor(ifelse(is.na(happy$Delivery.Quality), 1, 0))
+summary(happy$Delivery.Quality_M)
+happy$Delivery.Quality[is.na(happy$Delivery.Quality)]<-mean(happy$Delivery.Quality, na.rm=TRUE)
+summary(happy$Delivery.Quality)
+happy<- select(happy, -"Delivery.Quality_M")
+
+# impute Perceptions.if.corruption
+summary(happy$Perceptions.of.corruption)
+happy$Perceptions.of.corruption_M<-as.factor(ifelse(is.na(happy$Perceptions.of.corruption), 1, 0))
+summary(happy$Perceptions.of.corruption_M)
+happy$Perceptions.of.corruption[is.na(happy$Perceptions.of.corruption)]<-mean(happy$Perceptions.of.corruption, na.rm=TRUE)
+summary(happy$Perceptions.of.corruption)
+happy<- select(happy, -"Perceptions.of.corruption_M")
+
+# impute Generousity
+summary(happy$Generosity)
+happy$Generousity_M<-as.factor(ifelse(is.na(happy$Generosity), 1, 0))
+summary(happy$Generousity_M)
+happy$Generosity[is.na(happy$Generosity)]<-mean(happy$Generosity, na.rm=TRUE)
+summary(happy$Generosity)
+happy<- select(happy, -"Generousity_M")
+
+# impute Healthy.life.expectancy.at.birth
+summary(happy$Healthy.life.expectancy.at.birth)
+happy$healthy_M<-as.factor(ifelse(is.na(happy$Healthy.life.expectancy.at.birth), 1, 0))
+summary(happy$healthy_M)
+happy$Healthy.life.expectancy.at.birth[is.na(happy$Healthy.life.expectancy.at.birth)]<-mean(happy$Healthy.life.expectancy.at.birth, na.rm=TRUE)
+summary(happy$Healthy.life.expectancy.at.birth)
+happy<- select(happy, -"healthy_M")
+
+# impute Freedom.to.make.life.choices
+summary(happy$Freedom.to.make.life.choices)
+happy$freedom_M<-as.factor(ifelse(is.na(happy$Freedom.to.make.life.choices), 1, 0))
+summary(happy$freedom_M)
+happy$Freedom.to.make.life.choices[is.na(happy$Freedom.to.make.life.choices)]<-mean(happy$Freedom.to.make.life.choices, na.rm=TRUE)
+summary(happy$Freedom.to.make.life.choices)
+happy<- select(happy, -"freedom_M")
+
+# impute Log.GPD.per.capita
+summary(happy$Log.GDP.per.capita)
+happy$log_M<-as.factor(ifelse(is.na(happy$Log.GDP.per.capita), 1, 0))
+summary(happy$log_M)
+happy$Log.GDP.per.capita[is.na(happy$Log.GDP.per.capita)]<-mean(happy$Log.GDP.per.capita, na.rm=TRUE)
+summary(happy$Log.GDP.per.capita)
+happy<- select(happy, -"log_M")
+
+# impute Positvie.affect
+summary(happy$Positive.affect)
+happy$positive_M<-as.factor(ifelse(is.na(happy$Positive.affect), 1, 0))
+summary(happy$positive_M)
+happy$Positive.affect[is.na(happy$Positive.affect)]<-mean(happy$Positive.affect, na.rm=TRUE)
+summary(happy$Positive.affect)
+happy<- select(happy, -"positive_M")
+
+# impute Negative.affect
+summary(happy$Negative.affect)
+happy$negative_M<-as.factor(ifelse(is.na(happy$Negative.affect), 1, 0))
+summary(happy$negative_M)
+happy$Negative.affect[is.na(happy$Negative.affect)]<-mean(happy$Negative.affect, na.rm=TRUE)
+summary(happy$Negative.affect)
+happy<- select(happy, -"negative_M")
+
+# impute Social.support
+summary(happy$Social.support)
+happy$social_M<-as.factor(ifelse(is.na(happy$Social.support), 1, 0))
+summary(happy$social_M)
+happy$Social.support[is.na(happy$Social.support)]<-mean(happy$Social.support, na.rm=TRUE)
+summary(happy$Social.support)
+happy<- select(happy, -"social_M")
+
+plot_missing(happy)
+```
+Great! Now that we have no missing values in our data, we can build a regression model.
+
+# Building a Regression
+
+Since we have no missing data, it will be best to use all of it in our regression equation. This works well in predicting the output! Once we have a model, we can evaluate which variable has the most influence on Happiness score.
+
+## Our multiple regression and summary output.
+
+We remove country.name because the name is not a predictor of the happiness score (and mean or standard deviation of result, Life.ladder, so we remove those as well). Here, we simply create a subset of "happy" that we will use as predictors in out model, named "happy.preds".
+
+```{r}
+#remove country.name because the name is not a predictor of the happiness score (and mean or standard deviation of result)
+
+happy.preds<-select(happy,-"Country.name",-"Standard.deviation.of.ladder.by.country.year", -"Standard.deviation.Mean.of.ladder.by.country.year")
+
+set.seed(13)
+lm.model <- lm(Life.Ladder~. , data=happy.preds)
+summary(lm.model)
+```
+
+# Interpretations: What does this mean?
+
+Overall, our model is pretty good. We can tell that because based on the model, 76.31% (Adjusted R-squared value) of the variation of the happiness score is explained by our model. 
+
+Additionally, based on this output in the Estimate column, we can say that for every unit increase in Social.support, the Happiness score (Life.Ladder), will increase by 170.4997%. The same can be stated for the rest of the predictors as well. 
+
+# Visuals
+
+## Displaying the most important predictor variables
+
+The following is a  visual that displays the most important variables in predicting people's happiness.In order to do this, we had to create a data frame consisting of the results from the "varImp"code ran, and the corresponding data labels. This will allow us to create a more simplified visualization.
+
+```{r}
+varImp(lm.model)
+
+#list of variables used in the model
+fname<-c("year", "Log.GDP.per.capita", "Social.support", "Healthy.life.expectancy.at.birth", "Freedom.to.make.life.choices", "Generousity", "Perceptions.of.corruption", "Positive.affect", "Negative.affect", "Confidence.in.national.government", "Democratic.Quality", "Delivery.Quality")
+
+#corresponding variable importance of each variable
+score<-c(4.5642186, 13.4623680, 10.1198332, 9.5680150,
+         6.0851333, 4.7802497, 7.9921161, 11.4447679,
+         0.6746501,6.8788766, 0.1240353, 0.8134959)
+dat<-data.frame(fname,score)
+order.scores<-order(dat$score,dat$fname)
+dat1<-dat[order.scores,]
+
+
+#chart that shows overall importance of scores based on dat1 (for all countries)
+lollipop<- ggplot(dat1, aes(fname,score))+
+  geom_point(aes(x=fname, y=score, size=score, color=fname), data=dat1)+
+  labs(x="Predictor Column", y="Importance of Predictor", title = "Overall Importance of Predictors of Happiness")+
+  theme_classic(
+  )+
+  geom_linerange(aes(x=fname, ymin=0, ymax= score, color=fname),
+                  size = 5)+
+  theme(axis.text.x = element_text(angle=45))
+```
+
+
+```{r}
+lollipop
+```
+
+
+## Displaying the accuracy of the model
+
+The histogram below shows the variation distribution of the model residuals (difference between the predicted and actual observations). Since it is bell-shaped and a majority of the data is between -1 and 1, we know our model is pretty accurate. There is no skew which assures that we do not need to further transform any of the predictor variables. 
+
+```{r}
+ggplot(data=happy, aes(lm.model$residuals)) +
+  geom_histogram(binwidth = 0.25, color = "black", fill = "purple4") +
+  theme(panel.background = element_rect(fill = "white"),
+        axis.line.x=element_line(),
+        axis.line.y=element_line()) +
+  ggtitle("Histogram of Model Residuals")
+```
+
+# Conclusion
+From what our model told us, we can best predict a countries happiness score based on the GDP of the country. We would have to do some more research into why this is but, from the data dictionary, we know the following about our most important variable for predicting the happiness score:
+
+"The statistics of GDP per capita (variable name gdp) in purchasing power parity
+(PPP) at constant 2011 international dollar prices are from the November 28,
+2019 update of the World Development Indicators (WDI). The GDP figures for
+Taiwan, Syria, Palestine, Venezuela, and Djibouti, up to 2017, are from the
+Penn World Table 9.1.
+– GDP per capita in 2019 are not yet available as of December 2019. We
+extend the GDP-per-capita time series from 2018 to 2019 using country specific forecasts of real GDP growth in 2019 first from the OECD Economic Outlook No 106 (Edition November 2019) and then, if missing,
+forecasts from World Bank’s Global Economic Prospects (Last Updated:
+06/04/2019). The GDP growth forecasts are adjusted for population
+growth with the subtraction of 2017-18 population growth as the projected
+2018-19 growth."
+
+source:[Happiness Data Dictionary](https://happiness-report.s3.amazonaws.com/2020/WHR20_Ch2_Statistical_Appendix.pdf)
+
+With speculation, we could say that usually GDP is a good indicator of how well a country is performing economically. Thus, we might be able to draw a conclusion to say that the worse off a country is economically, the better a candidate it would be to have more customers in need of mental health therapy. The questions we would then follow up with would be:
+
+As a business, does this make sense?
+
+If the countries that are performing worse economically are the ones who are less happy, would people there be interested in paying for professional help?
+
+Is there a more affordable way we, as a company, can provide professional help, but also still turn a profit?
+
+These questions would lead us into further research and more insight based off this data and our model. From the Business value proposition canvas I created, there is a lot more I would have liked to provide based off of this data. However, with the scope of resources and time I had, I feel as though these visualizations and this model is a great start. In order to find the most important factors for each country, we would need to subset the data by country name, run the model on that data, and then create the same visualization to see what the most important factors are. With more time and resources this could be accomplished. For now, our analysis gives us a good start to what we wish to provide for the customer segment.
+
+
